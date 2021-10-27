@@ -4,7 +4,6 @@ import com.david.secretsanta.models.PersonFamily;
 import com.david.secretsanta.models.SecretSantaRelationship;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +26,14 @@ public class TestSecretSantaGenerator {
 
         //check secret santa are distincts
         assertSecretSantaAreDistincts(secretSantaRelationships);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void generateSecretSantaShouldFailedWhenGroupHasLess2People() {
+        Set<PersonFamily> persons = new HashSet<>();
+        persons.add(new PersonFamily("1", "MARTIN", "Philippe", "1"));
+        SecretSantaGenerator secretSantaGenerator = new SecretSantaGeneratorImpl();
+        secretSantaGenerator.generate(persons);
     }
 
     private void assertEachPersonIsNotItsOwnSecretSanta (Set<SecretSantaRelationship> secretSantaRelationships) {
