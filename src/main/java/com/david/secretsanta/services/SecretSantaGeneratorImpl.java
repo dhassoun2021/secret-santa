@@ -2,6 +2,8 @@ package com.david.secretsanta.services;
 
 import com.david.secretsanta.models.PersonFamily;
 import com.david.secretsanta.models.SecretSantaRelationship;
+import com.david.secretsanta.services.constraint.SecretSantaConstraint;
+import com.david.secretsanta.services.constraint.SenderNotSecretSantaConstraint;
 import com.david.secretsanta.util.RandomNumberGenerator;
 
 import java.util.*;
@@ -17,8 +19,12 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         Set<SecretSantaRelationship> secretSantaRelationships = new HashSet<>();
         Map<Long, PersonFamily> numberPersonFamily = attributeNumberToParticipant(personFamilies);
         Set<Long> numbersPersonIgnored = new HashSet<>();
+
+        List <SecretSantaConstraint> constraints = new ArrayList<>();
+        constraints.add(new SenderNotSecretSantaConstraint());
         numberPersonFamily.keySet().stream().forEach(k -> {
-            long numberSecretSanta = computeRandomNumberSecretSanta(k, numberPersonFamily.size(), numbersPersonIgnored);
+
+            long numberSecretSanta = computeRandomNumberSecretSanta(k, numberPersonFamily.size(), numbersPersonIgnored,constraints);
             PersonFamily secretSanta = numberPersonFamily.get(numberSecretSanta);
             PersonFamily sender = numberPersonFamily.get(k);
             secretSantaRelationships.add(new SecretSantaRelationship(sender, secretSanta));
@@ -52,9 +58,11 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         return RandomNumberGenerator.generate(numbersPersonIgnored, maxValue);
     }
 
-    private long computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored) {
-        Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored.stream().collect(Collectors.toSet());
-        numbersIgnoredAfterApplyConstraint.add(personNumber);
+    private long computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored,List <SecretSantaConstraint> constraints) {
+        Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored;
+        for (SecretSantaConstraint constraint : constraints) {
+            numbersIgnoredAfterApplyConstraint = constraint.apply(personNumber,numbersPersonIgnored);
+        }
         long numberPersonSanta = _computeRandomNumberSecretSanta(personNumber, maxValue, numbersIgnoredAfterApplyConstraint);
         numbersPersonIgnored.add(numberPersonSanta);
         return numberPersonSanta;
