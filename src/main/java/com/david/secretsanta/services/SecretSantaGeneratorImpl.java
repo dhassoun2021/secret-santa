@@ -6,6 +6,7 @@ import com.david.secretsanta.util.RandomNumberGenerator;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 
 public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
@@ -41,28 +42,21 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         return numberPersonFamily;
     }
 
-    private long _computeRandomNumberSecretSanta (Long personNumber,int maxValue, Set<Long> numbersPersonIgnored ) {
+    private long _computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored) {
         long maybeLastValue = personNumber + 1;
         if (maybeLastValue == maxValue) {
-            if (!numbersPersonIgnored .contains(maybeLastValue)) {
+            if (!numbersPersonIgnored.contains(maybeLastValue)) {
                 return maybeLastValue;
             }
         }
-        return RandomNumberGenerator.generate(numbersPersonIgnored ,maxValue);
+        return RandomNumberGenerator.generate(numbersPersonIgnored, maxValue);
     }
 
-    private long computeRandomNumberSecretSanta(Long personNumber,int maxValue, Set<Long> numbersPersonIgnored ) {
-        boolean isPersonProcessingSanta = false;
-        if (numbersPersonIgnored .contains(personNumber)) {
-            isPersonProcessingSanta = true;
-        } else {
-            numbersPersonIgnored .add(personNumber);
-        }
-        long numberPersonSanta = _computeRandomNumberSecretSanta(personNumber,maxValue,numbersPersonIgnored );
-        if (!isPersonProcessingSanta) {
-            numbersPersonIgnored .remove(personNumber);
-        }
-        numbersPersonIgnored .add(numberPersonSanta);
+    private long computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored) {
+        Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored.stream().collect(Collectors.toSet());
+        numbersIgnoredAfterApplyConstraint.add(personNumber);
+        long numberPersonSanta = _computeRandomNumberSecretSanta(personNumber, maxValue, numbersIgnoredAfterApplyConstraint);
+        numbersPersonIgnored.add(numberPersonSanta);
         return numberPersonSanta;
     }
 }
