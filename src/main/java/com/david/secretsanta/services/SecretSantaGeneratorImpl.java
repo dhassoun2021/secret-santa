@@ -16,11 +16,11 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
     @Override
     public Set<SecretSantaRelationship> generate(Set<PersonFamily> personFamilies) {
         checkParameter(personFamilies);
-        Set<SecretSantaRelationship> secretSantaRelationships = new HashSet<>();
-        Map<Long, PersonFamily> numberPersonFamily = attributeNumberToParticipant(personFamilies);
-        Set<Long> numbersPersonIgnored = new HashSet<>();
+        final Set<SecretSantaRelationship> secretSantaRelationships = new HashSet<>();
+        final Map<Long, PersonFamily> numberPersonFamily = attributeNumberToParticipant(personFamilies);
+        final Set<Long> numbersPersonIgnored = new HashSet<>();
 
-        List <SecretSantaConstraint> constraints = new ArrayList<>();
+        final List <SecretSantaConstraint> constraints = new ArrayList<>();
         constraints.add(new SenderNotSecretSantaConstraint());
         numberPersonFamily.keySet().stream().forEach(k -> {
 
@@ -59,10 +59,8 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
     }
 
     private long computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored,List <SecretSantaConstraint> constraints) {
-        Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored;
-        for (SecretSantaConstraint constraint : constraints) {
-            numbersIgnoredAfterApplyConstraint = constraint.apply(personNumber,numbersPersonIgnored);
-        }
+        Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored.stream().collect(Collectors.toSet());
+        constraints.stream().forEach(c->numbersIgnoredAfterApplyConstraint.addAll(c.apply(personNumber)));
         long numberPersonSanta = _computeRandomNumberSecretSanta(personNumber, maxValue, numbersIgnoredAfterApplyConstraint);
         numbersPersonIgnored.add(numberPersonSanta);
         return numberPersonSanta;

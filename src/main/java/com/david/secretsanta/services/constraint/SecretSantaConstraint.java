@@ -5,5 +5,5 @@ import java.util.Set;
 public interface SecretSantaConstraint {
 
 
-    Set<Long> apply(Long numberPerson,Set<Long> numbersIgnored );
+    Set<Long> apply(Long numberPerson);
 }
