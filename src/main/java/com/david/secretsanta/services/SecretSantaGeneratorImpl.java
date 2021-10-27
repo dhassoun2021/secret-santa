@@ -12,17 +12,24 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
 
     @Override
     public Set<SecretSantaRelationship> generate(Set<PersonFamily> personFamilies) {
+        checkParameter(personFamilies);
         Set<SecretSantaRelationship> secretSantaRelationships = new HashSet<>();
         Map<Long, PersonFamily> numberPersonFamily = attributeNumberToParticipant(personFamilies);
-        Set<Long> numberNotToBeProcessed = new HashSet<>();
+        Set<Long> numbersPersonIgnored = new HashSet<>();
         numberPersonFamily.keySet().stream().forEach(k -> {
-            long numberSecretSanta = getSecretsSanta(k, numberPersonFamily.size(), numberNotToBeProcessed);
+            long numberSecretSanta = computeRandomNumberSecretSanta(k, numberPersonFamily.size(), numbersPersonIgnored);
             PersonFamily secretSanta = numberPersonFamily.get(numberSecretSanta);
             PersonFamily sender = numberPersonFamily.get(k);
             secretSantaRelationships.add(new SecretSantaRelationship(sender, secretSanta));
         });
 
         return secretSantaRelationships;
+    }
+
+    private void checkParameter(Set<PersonFamily> personFamilies) {
+        if (personFamilies == null || personFamilies.size() < 2) {
+            throw new IllegalArgumentException("Members in group should be at least 2");
+        }
     }
 
     private Map<Long, PersonFamily> attributeNumberToParticipant(Set<PersonFamily> personFamilies) {
@@ -34,28 +41,28 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         return numberPersonFamily;
     }
 
-    private long computeRandomNumberSecretSanta (Long personNumber,int maxValue, Set<Long> numberNotToBeProcessed) {
+    private long _computeRandomNumberSecretSanta (Long personNumber,int maxValue, Set<Long> numbersPersonIgnored ) {
         long maybeLastValue = personNumber + 1;
         if (maybeLastValue == maxValue) {
-            if (!numberNotToBeProcessed.contains(maybeLastValue)) {
+            if (!numbersPersonIgnored .contains(maybeLastValue)) {
                 return maybeLastValue;
             }
         }
-        return RandomNumberGenerator.generate(numberNotToBeProcessed,maxValue);
+        return RandomNumberGenerator.generate(numbersPersonIgnored ,maxValue);
     }
 
-    private long getSecretsSanta(Long personNumber,int maxValue, Set<Long> numberNotToBeProcessed) {
+    private long computeRandomNumberSecretSanta(Long personNumber,int maxValue, Set<Long> numbersPersonIgnored ) {
         boolean isPersonProcessingSanta = false;
-        if (numberNotToBeProcessed.contains(personNumber)) {
+        if (numbersPersonIgnored .contains(personNumber)) {
             isPersonProcessingSanta = true;
         } else {
-            numberNotToBeProcessed.add(personNumber);
+            numbersPersonIgnored .add(personNumber);
         }
-        long numberPersonSanta = computeRandomNumberSecretSanta(personNumber,maxValue,numberNotToBeProcessed);
+        long numberPersonSanta = _computeRandomNumberSecretSanta(personNumber,maxValue,numbersPersonIgnored );
         if (!isPersonProcessingSanta) {
-            numberNotToBeProcessed.remove(personNumber);
+            numbersPersonIgnored .remove(personNumber);
         }
-        numberNotToBeProcessed.add(numberPersonSanta);
+        numbersPersonIgnored .add(numberPersonSanta);
         return numberPersonSanta;
     }
 }
