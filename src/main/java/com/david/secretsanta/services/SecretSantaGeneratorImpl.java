@@ -16,9 +16,10 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         Map<Long, PersonFamily> numberPersonFamily = attributeNumberToParticipant(personFamilies);
         Set<Long> numberNotToBeProcessed = new HashSet<>();
         numberPersonFamily.keySet().stream().forEach(k -> {
-            PersonFamily personFamilyRecipient = getSecretsSanta(k, numberPersonFamily, numberNotToBeProcessed);
-            PersonFamily secretSanta = numberPersonFamily.get(k);
-            secretSantaRelationships.add(new SecretSantaRelationship(personFamilyRecipient, secretSanta));
+            long numberSecretSanta = getSecretsSanta(k, numberPersonFamily.size(), numberNotToBeProcessed);
+            PersonFamily secretSanta = numberPersonFamily.get(numberSecretSanta);
+            PersonFamily sender = numberPersonFamily.get(k);
+            secretSantaRelationships.add(new SecretSantaRelationship(sender, secretSanta));
         });
 
         return secretSantaRelationships;
@@ -33,10 +34,28 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         return numberPersonFamily;
     }
 
-    private PersonFamily getSecretsSanta(Long personNumber, Map<Long, PersonFamily> numberPersonFamily, Set<Long> numberNotToBeProcessed) {
-        numberNotToBeProcessed.add(personNumber);
-        long numberPerson = RandomNumberGenerator.generate(numberNotToBeProcessed);
-        numberNotToBeProcessed.add(numberPerson);
-        return numberPersonFamily.get(numberPerson);
+    private long computeRandomNumberSecretSanta (Long personNumber,int maxValue, Set<Long> numberNotToBeProcessed) {
+        long maybeLastValue = personNumber + 1;
+        if (maybeLastValue == maxValue) {
+            if (!numberNotToBeProcessed.contains(maybeLastValue)) {
+                return maybeLastValue;
+            }
+        }
+        return RandomNumberGenerator.generate(numberNotToBeProcessed,maxValue);
+    }
+
+    private long getSecretsSanta(Long personNumber,int maxValue, Set<Long> numberNotToBeProcessed) {
+        boolean isPersonProcessingSanta = false;
+        if (numberNotToBeProcessed.contains(personNumber)) {
+            isPersonProcessingSanta = true;
+        } else {
+            numberNotToBeProcessed.add(personNumber);
+        }
+        long numberPersonSanta = computeRandomNumberSecretSanta(personNumber,maxValue,numberNotToBeProcessed);
+        if (!isPersonProcessingSanta) {
+            numberNotToBeProcessed.remove(personNumber);
+        }
+        numberNotToBeProcessed.add(numberPersonSanta);
+        return numberPersonSanta;
     }
 }

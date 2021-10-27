@@ -44,4 +44,14 @@ public class PersonFamily {
     public int hashCode() {
         return Objects.hash(id, surname, forename, idGroupFamily);
     }
+
+    @Override
+    public String toString() {
+        return "PersonFamily{" +
+                "id='" + id + '\'' +
+                ", surname='" + surname + '\'' +
+                ", forename='" + forename + '\'' +
+                ", idGroupFamily='" + idGroupFamily + '\'' +
+                '}';
+    }
 }

@@ -32,4 +32,12 @@ public class SecretSantaRelationship {
     public int hashCode() {
         return Objects.hash(personFamily, secretSanta);
     }
+
+    @Override
+    public String toString() {
+        return "SecretSantaRelationship{" +
+                "personFamily=" + personFamily +
+                ", secretSanta=" + secretSanta +
+                '}';
+    }
 }
