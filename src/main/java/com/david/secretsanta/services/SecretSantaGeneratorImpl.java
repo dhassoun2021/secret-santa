@@ -23,7 +23,6 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         final List <SecretSantaConstraint> constraints = new ArrayList<>();
         constraints.add(new SenderNotSecretSantaConstraint());
         numberPersonFamily.keySet().stream().forEach(k -> {
-
             long numberSecretSanta = computeRandomNumberSecretSanta(k, numberPersonFamily.size(), numbersPersonIgnored,constraints);
             PersonFamily secretSanta = numberPersonFamily.get(numberSecretSanta);
             PersonFamily sender = numberPersonFamily.get(k);
@@ -49,6 +48,8 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
     }
 
     private long _computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored) {
+        // if person processing is avant dernier, if last person number was not choosen as secret Santa
+        // this last person number should be choosen for avant dernier person
         long maybeLastValue = personNumber + 1;
         if (maybeLastValue == maxValue) {
             if (!numbersPersonIgnored.contains(maybeLastValue)) {
@@ -58,6 +59,14 @@ public class SecretSantaGeneratorImpl implements SecretSantaGenerator {
         return RandomNumberGenerator.generate(numbersPersonIgnored, maxValue);
     }
 
+    /**
+     * For each person number we choose randomly a number corresponding to a secret santa
+     * @param personNumber personNumber of person which will be affected to a secret santa
+     * @param maxValue maxValue of number to be generate randomly
+     * @param numbersPersonIgnored set of number will be ignored for generate number randomly
+     * @param constraints list of constraint to apply
+     * @return number corresponding to secret santa choosen
+     */
     private long computeRandomNumberSecretSanta(Long personNumber, int maxValue, Set<Long> numbersPersonIgnored,List <SecretSantaConstraint> constraints) {
         Set<Long> numbersIgnoredAfterApplyConstraint = numbersPersonIgnored.stream().collect(Collectors.toSet());
         constraints.stream().forEach(c->numbersIgnoredAfterApplyConstraint.addAll(c.apply(personNumber)));
